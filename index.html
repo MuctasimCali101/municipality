@@ -8,7 +8,41 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0a1628">
   <link rel="apple-touch-icon" href="assets/img/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+  <!-- Critical inline CSS fallback if external CSS fails to load -->
+  <style>
+    body { background: #0a1628; color: #fff; font-family: sans-serif; margin: 0; }
+    .login-page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background: linear-gradient(135deg, #0a1628, #0d1f3c, #0a1628); }
+    .login-logo { text-align: center; margin-bottom: 32px; }
+    .login-logo .logo-icon { width: 64px; height: 64px; background: #00c896; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.8rem; font-weight: 800; color: #0a1628; }
+    .login-logo h1 { font-size: 1.4rem; font-weight: 800; margin: 0; }
+    .login-logo p { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 4px; }
+    .login-card { width: 100%; max-width: 400px; }
+    .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 32px 24px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: rgba(255,255,255,0.7); }
+    .form-group input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #fff; font-size: 0.95rem; box-sizing: border-box; min-height: 44px; }
+    .form-group input:focus { outline: none; border-color: #00c896; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; min-height: 44px; text-decoration: none; font-family: inherit; }
+    .btn-primary { background: #00c896; color: #0a1628 !important; width: 100%; }
+    .btn-primary:hover { background: #00b086; }
+    .btn-ghost { background: transparent; color: rgba(255,255,255,0.7) !important; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.05); }
+    .btn-sm { padding: 8px 16px; font-size: 0.8rem; min-height: 36px; }
+    .text-center { text-align: center; }
+    .login-footer { text-align: center; margin-top: 20px; font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+    .lang-switcher { position: absolute; top: 16px; right: 16px; z-index: 2; display: flex; gap: 4px; }
+    .lang-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; font-family: inherit; }
+    .lang-btn.active { background: rgba(0,200,150,0.15); border-color: #00c896; color: #00c896; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 24px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #0a1628; border: 1px solid rgba(0,200,150,0.2); border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 480px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer; }
+    .modal h2 { margin-bottom: 20px; font-size: 1.5rem; }
+  </style>
 </head>
 <body class="no-bottom-nav">
   <div class="login-page">
