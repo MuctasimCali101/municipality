@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Land Digitizer — MUNICIPALITY</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a1628">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="container">
+      <div class="nav-brand">
+        <div style="width:32px;height:32px;background:#00c896;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0a1628;font-size:0.9rem;">M</div>
+        MUNICIPALITY
+      </div>
+      <div class="nav-right">
+        <button class="btn-logout" onclick="AUTH.logout()">Ka bax</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-top:calc(64px + 12px);padding-bottom:12px;">
+    <!-- Pre-filled data panel -->
+    <div class="digitizer-data" id="dataPanel">
+      <div class="data-row"><span class="data-label">Milkiilaha:</span><span class="data-value" id="infoOwner">—</span></div>
+      <div class="data-row"><span class="data-label">Taleefanka:</span><span class="data-value" id="infoPhone">—</span></div>
+      <div class="data-row"><span class="data-label">Degmada:</span><span class="data-value" id="infoDistrict">—</span></div>
+      <div class="data-row"><span class="data-label">Xaafada:</span><span class="data-value" id="infoSection">—</span></div>
+    </div>
+
+    <!-- Map tools -->
+    <div class="map-tools">
+      <button class="btn btn-outline btn-sm" onclick="DIGITIZER.getGPS()">&#128752; GPS</button>
+      <button class="btn btn-outline btn-sm" onclick="DIGITIZER.undoPoint()">&#8617; Ka noqo</button>
+      <button class="btn btn-outline btn-sm" onclick="DIGITIZER.clearAll()">&#128465; Nadiifi</button>
+      <button class="btn btn-outline btn-sm" onclick="DIGITIZER.toggleCoordList()">&#128204; Isuduwaha</button>
+      <button class="btn btn-primary btn-sm" onclick="handleKMLExport()">&#128230; Soo deji KML</button>
+    </div>
+
+    <!-- Map container -->
+    <div class="map-container" style="height:calc(100vh - 380px);min-height:300px;">
+      <div id="map" style="width:100%;height:100%;"></div>
+
+      <!-- Coordinate list -->
+      <div class="coord-list" id="coordList"></div>
+
+      <!-- Info panel -->
+      <div class="map-info-panel">
+        <div class="info-item">
+          <span class="info-value" id="pointCount">0</span>
+          <span class="info-label">Dhibcood</span>
+        </div>
+        <div class="info-item">
+          <span class="info-value" id="digitizedArea">0.0</span>
+          <span class="info-label">Bed (m²)</span>
+        </div>
+        <div class="info-item">
+          <span class="info-value" id="digitizedPerimeter">0.0</span>
+          <span class="info-label">Wareega (m)</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn btn-outline btn-sm" onclick="goBackToForm()" style="flex:1;">&#8592; Ku noqo foomka</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/map.js"></script>
+  <script>
+    let gpsEnabled = false;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!AUTH.requireAuth()) return;
+
+      // Read URL params
+      const params = new URLSearchParams(window.location.search);
+      const ownerName = params.get('ownerName') || '—';
+      const phone = params.get('phone') || '—';
+      const subDistrict = params.get('subDistrict') || '—';
+      const section = params.get('section') || '—';
+      const cityCode = params.get('cityCode') || AUTH.getCurrentUser()?.cityCode || '';
+
+      document.getElementById('infoOwner').textContent = ownerName;
+      document.getElementById('infoPhone').textContent = phone;
+      document.getElementById('infoDistrict').textContent = subDistrict;
+      document.getElementById('infoSection').textContent = section;
+
+      // Init map
+      DIGITIZER.initMap('map', cityCode);
+
+      // Auto GPS after a moment
+      setTimeout(() => {
+        DIGITIZER.getGPS();
+      }, 1000);
+    });
+
+    function handleKMLExport() {
+      const params = new URLSearchParams(window.location.search);
+      const ownerName = params.get('ownerName') || 'Unknown';
+      const surveyDate = params.get('surveyDate') || APP.todayISO();
+
+      const kmlData = DIGITIZER.generateKML(ownerName, surveyDate);
+      if (kmlData) {
+        DIGITIZER.downloadKML(kmlData);
+        APP.showToast('KML waa la soo dejiyay', 'success');
+
+        // Update the KML info on the form page
+        sessionStorage.setItem('kml_generated', 'true');
+      }
+    }
+
+    function goBackToForm() {
+      window.location.href = 'form.html';
+    }
+  </script>
+</body>
+</html>

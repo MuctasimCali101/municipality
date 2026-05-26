@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Admin Panel — MUNICIPALITY</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a1628">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="container">
+      <div class="nav-brand">
+        <div style="width:32px;height:32px;background:#00c896;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0a1628;font-size:0.9rem;">M</div>
+        MUNICIPALITY Admin
+      </div>
+      <div class="nav-right">
+        <button class="btn-logout" onclick="AUTH.logout()">Ka bax</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-top:calc(64px + 20px);padding-bottom:80px;">
+    <h1 style="margin-bottom:20px;">Admin Panel</h1>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="users" onclick="switchTab('users')">Isticmaalayaasha</button>
+      <button class="admin-tab" data-tab="cities" onclick="switchTab('cities')">Magaalooyinka</button>
+      <button class="admin-tab" data-tab="data" onclick="switchTab('data')">Xogta</button>
+      <button class="admin-tab" data-tab="settings" onclick="switchTab('settings')">Settings</button>
+    </div>
+
+    <!-- Users Tab -->
+    <div class="admin-section active" id="tab-users">
+      <div class="flex items-center justify-between" style="margin-bottom:16px;">
+        <h3>Isticmaalayaasha</h3>
+        <button class="btn btn-primary btn-sm" onclick="showAddUser()">+ Isticmaale Cusub</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Magaalada</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="usersBody">
+              <tr><td colspan="6" class="text-center text-muted" style="padding:32px;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cities Tab -->
+    <div class="admin-section" id="tab-cities">
+      <div class="flex items-center justify-between" style="margin-bottom:16px;">
+        <h3>Magaalooyinka</h3>
+        <button class="btn btn-primary btn-sm" onclick="showAddCity()">+ Magaalo Cusub</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>City Code</th><th>City Name</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody id="citiesBody">
+              <tr><td colspan="4" class="text-center text-muted" style="padding:32px;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Tab -->
+    <div class="admin-section" id="tab-data">
+      <div class="flex items-center justify-between" style="margin-bottom:16px;">
+        <h3>Dhammaan Xogta</h3>
+        <button class="btn btn-outline btn-sm" onclick="exportAllData()">&#128229; Soo saar CSV</button>
+      </div>
+      <div class="search-bar">
+        <select id="dataCityFilter" onchange="filterData()">
+          <option value="">Dhammaan magaalooyinka</option>
+        </select>
+        <input type="date" id="dataDateStart" onchange="filterData()">
+        <input type="date" id="dataDateEnd" onchange="filterData()">
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Milkiilaha</th><th>Magaalada</th><th>Degmada</th><th>Bed (m²)</th><th>Taariikhda</th><th>Injineer</th></tr>
+            </thead>
+            <tbody id="dataBody">
+              <tr><td colspan="7" class="text-center text-muted" style="padding:32px;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="admin-section" id="tab-settings">
+      <h3 style="margin-bottom:16px;">Settings</h3>
+      <div class="card" style="max-width:480px;">
+        <div class="form-group">
+          <label>Bedel furaha admin-ka</label>
+          <input type="password" id="newAdminPassword" placeholder="Furaha cusub">
+        </div>
+        <div class="form-group">
+          <label>Xaqiiji furaha cusub</label>
+          <input type="password" id="confirmAdminPassword" placeholder="Mar kale qor">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="changeAdminPassword()">Bedel furaha</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add User Modal -->
+  <div class="modal-overlay" id="addUserModal">
+    <div class="modal" style="position:relative;">
+      <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+      <h2>Isticmaale Cusub</h2>
+      <form id="addUserForm">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="newUsername" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="newUserPassword" required>
+        </div>
+        <div class="form-group">
+          <label>Role</label>
+          <select id="newUserRole" required>
+            <option value="field_engineer">Field Engineer</option>
+            <option value="supervisor">Supervisor</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>City Code</label>
+          <input type="text" id="newUserCity" placeholder="e.g. BOS" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Ku dar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add City Modal -->
+  <div class="modal-overlay" id="addCityModal">
+    <div class="modal" style="position:relative;">
+      <button class="modal-close" onclick="closeModal('addCityModal')">&times;</button>
+      <h2>Magaalo Cusub</h2>
+      <form id="addCityForm">
+        <div class="form-group">
+          <label>City Code</label>
+          <input type="text" id="newCityCode" placeholder="e.g. BOS" required>
+        </div>
+        <div class="form-group">
+          <label>City Name</label>
+          <input type="text" id="newCityName" placeholder="e.g. Bosaso" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Ku dar</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!AUTH.requireRole(['admin'])) return;
+      loadUsers();
+      loadCities();
+    });
+
+    function switchTab(tab) {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+      document.querySelectorAll('.admin-section').forEach(s => s.classList.toggle('active', s.id === `tab-${tab}`));
+      if (tab === 'data') loadAllData();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    // --- Users ---
+    async function loadUsers() {
+      try {
+        const result = await API.getUsers();
+        const tbody = document.getElementById('usersBody');
+        if (result.success && result.data) {
+          tbody.innerHTML = result.data.map(u => `
+            <tr>
+              <td><strong>${u.username}</strong></td>
+              <td>${u.role}</td>
+              <td>${u.city_code || 'ALL'}</td>
+              <td><span class="table-status ${u.active ? 'completed' : 'draft'}">${u.active ? 'Active' : 'Inactive'}</span></td>
+              <td style="font-size:0.75rem;">${u.last_login || '—'}</td>
+              <td>
+                <div class="table-actions">
+                  <button class="btn btn-outline btn-sm" onclick="toggleUserStatus('${u.username}')">${u.active ? '&#128465;' : '&#10003;'}</button>
+                  <button class="btn btn-outline btn-sm" onclick="resetUserPassword('${u.username}')">&#128260;</button>
+                </div>
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        document.getElementById('usersBody').innerHTML =
+          '<tr><td colspan="6" class="text-center text-muted" style="padding:32px;">Error loading users</td></tr>';
+      }
+    }
+
+    function showAddUser() {
+      document.getElementById('addUserForm').reset();
+      document.getElementById('addUserModal').classList.add('open');
+    }
+
+    document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        username: document.getElementById('newUsername').value.trim(),
+        password: document.getElementById('newUserPassword').value.trim(),
+        role: document.getElementById('newUserRole').value,
+        cityCode: document.getElementById('newUserCity').value.trim().toUpperCase(),
+      };
+
+      APP.showLoading();
+      try {
+        const result = await API.addUser(data);
+        APP.hideLoading();
+        if (result.success) {
+          APP.showToast('Isticmaale waa la abuuray', 'success');
+          closeModal('addUserModal');
+          loadUsers();
+        } else {
+          APP.showToast(result.message || 'Error', 'error');
+        }
+      } catch (err) {
+        APP.hideLoading();
+        APP.showToast('Error creating user', 'error');
+      }
+    });
+
+    async function toggleUserStatus(username) {
+      if (!confirm(`Ma doonaysaa inaad bedesho status-ka "${username}"?`)) return;
+      APP.showLoading();
+      try {
+        const result = await API.updateUser({ username, action: 'toggleActive' });
+        APP.hideLoading();
+        if (result.success) {
+          APP.showToast('Status waa la bedelay', 'success');
+          loadUsers();
+        }
+      } catch (err) {
+        APP.hideLoading();
+        APP.showToast('Error', 'error');
+      }
+    }
+
+    async function resetUserPassword(username) {
+      const newPass = prompt(`Furaha cusub ee "${username}":`);
+      if (!newPass || newPass.length < 4) return;
+      APP.showLoading();
+      try {
+        const result = await API.updateUser({ username, password: newPass, action: 'resetPassword' });
+        APP.hideLoading();
+        if (result.success) {
+          APP.showToast('Furaha waa la bedelay', 'success');
+        }
+      } catch (err) {
+        APP.hideLoading();
+        APP.showToast('Error', 'error');
+      }
+    }
+
+    // --- Cities ---
+    async function loadCities() {
+      try {
+        const result = await API.getCities();
+        const tbody = document.getElementById('citiesBody');
+        const filterCities = document.getElementById('dataCityFilter');
+
+        if (result.success && result.data) {
+          tbody.innerHTML = result.data.map(c => `
+            <tr>
+              <td><strong>${c.city_code}</strong></td>
+              <td>${c.city_name}</td>
+              <td><span class="table-status ${c.active ? 'completed' : 'draft'}">${c.active ? 'Active' : 'Inactive'}</span></td>
+              <td>
+                <button class="btn btn-outline btn-sm" onclick="alert('City management in development')">Tafatir</button>
+              </td>
+            </tr>
+          `).join('');
+
+          filterCities.innerHTML = '<option value="">Dhammaan magaalooyinka</option>' +
+            result.data.filter(c => c.active).map(c =>
+              `<option value="${c.city_code}">${c.city_name} (${c.city_code})</option>`
+            ).join('');
+        }
+      } catch (err) {
+        document.getElementById('citiesBody').innerHTML =
+          '<tr><td colspan="4" class="text-center text-muted" style="padding:32px;">Error loading cities</td></tr>';
+      }
+    }
+
+    function showAddCity() {
+      document.getElementById('addCityForm').reset();
+      document.getElementById('addCityModal').classList.add('open');
+    }
+
+    document.getElementById('addCityForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      APP.showToast('City creation will be available via Apps Script', 'info');
+      closeModal('addCityModal');
+      // In real app: API call to add city
+    });
+
+    // --- All Data ---
+    async function loadAllData() {
+      const tbody = document.getElementById('dataBody');
+      APP.showLoading();
+      try {
+        const result = await API.getSubmissions({});
+        if (result.success && result.data) {
+          tbody.innerHTML = result.data.map(s => `
+            <tr>
+              <td style="font-family:monospace;font-size:0.75rem;">${s.submission_id || '—'}</td>
+              <td>${s.owner_name || '—'}</td>
+              <td>${s.city_code || '—'}</td>
+              <td>${s.sub_district || '—'}</td>
+              <td>${parseFloat(s.land_area || s.gis_area || 0).toFixed(1)}</td>
+              <td>${APP.formatDate(s.survey_date)}</td>
+              <td>${s.engineer_name || '—'}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding:32px;">Error loading data</td></tr>';
+      }
+      APP.hideLoading();
+    }
+
+    function filterData() {
+      loadAllData();
+    }
+
+    async function exportAllData() {
+      APP.showLoading();
+      try {
+        const result = await API.exportAllCSV();
+        APP.hideLoading();
+        if (result.success && result.csv) {
+          const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `MUNICIPALITY_all_data_${APP.todayISO()}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          APP.showToast('CSV waa la soo dejiyay', 'success');
+        }
+      } catch (err) {
+        APP.hideLoading();
+        APP.showToast('Error exporting data', 'error');
+      }
+    }
+
+    // --- Settings ---
+    async function changeAdminPassword() {
+      const newPass = document.getElementById('newAdminPassword').value;
+      const confirmPass = document.getElementById('confirmAdminPassword').value;
+
+      if (!newPass || newPass.length < 6) {
+        APP.showToast('Furaha waa inuu ka kooban yahay 6 xaraf', 'error');
+        return;
+      }
+      if (newPass !== confirmPass) {
+        APP.showToast('Furaha kuma eka', 'error');
+        return;
+      }
+
+      APP.showLoading();
+      try {
+        const result = await API.updateUser({ username: 'admin', password: newPass, action: 'changeAdminPassword' });
+        APP.hideLoading();
+        if (result.success) {
+          APP.showToast('Furaha admin-ka waa la bedelay', 'success');
+          document.getElementById('newAdminPassword').value = '';
+          document.getElementById('confirmAdminPassword').value = '';
+        }
+      } catch (err) {
+        APP.hideLoading();
+        APP.showToast('Error', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

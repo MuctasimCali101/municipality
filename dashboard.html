@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dashboard — MUNICIPALITY</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a1628">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <!-- Top Nav -->
+  <nav class="top-nav">
+    <div class="container">
+      <div class="nav-brand">
+        <div style="width:32px;height:32px;background:#00c896;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0a1628;font-size:0.9rem;">M</div>
+        MUNICIPALITY
+        <span id="navCity" style="display:none;"></span>
+      </div>
+      <div class="nav-right">
+        <span class="nav-user" id="navUser"></span>
+        <span class="nav-city" id="navCityBadge"></span>
+        <button class="btn-logout" onclick="AUTH.logout()">Ka bax</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container" style="padding-top:calc(64px + 20px);padding-bottom:20px;">
+    <!-- Welcome -->
+    <div style="margin-bottom:20px;">
+      <h1 id="welcomeHeading">Soo dhawoow</h1>
+      <p class="text-muted" id="welcomeSubtext">Halkan waxaad ka arki kartaa soo koobidda diwaanadaada.</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card green-border">
+        <div class="stat-icon">&#128197;</div>
+        <span class="stat-value" id="statToday">0</span>
+        <span class="stat-label" data-i18n="total_today">Diwaan Maanta</span>
+      </div>
+      <div class="stat-card green-border">
+        <div class="stat-icon">&#128200;</div>
+        <span class="stat-value" id="statMonth">0</span>
+        <span class="stat-label" data-i18n="total_month">Diwaan Bishan</span>
+      </div>
+      <div class="stat-card green-border">
+        <div class="stat-icon">&#128205;</div>
+        <span class="stat-value" id="statArea">0</span>
+        <span class="stat-label" data-i18n="total_area">Bed Dhul (m²)</span>
+      </div>
+      <div class="stat-card orange-border">
+        <div class="stat-icon">&#128221;</div>
+        <span class="stat-value" id="statPending">0</span>
+        <span class="stat-label" data-i18n="pending">Qabyo</span>
+      </div>
+      <div class="stat-card green-border">
+        <div class="stat-icon">&#128104;</div>
+        <span class="stat-value" id="statMale">0</span>
+        <span class="stat-label" data-i18n="male">Lab</span>
+      </div>
+      <div class="stat-card green-border">
+        <div class="stat-icon">&#128105;</div>
+        <span class="stat-value" id="statFemale">0</span>
+        <span class="stat-label" data-i18n="female">Dhedig</span>
+      </div>
+    </div>
+
+    <!-- Recent Submissions -->
+    <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+      <h3 data-i18n="recent_submissions">Diwaanadii danbe</h3>
+      <a href="submissions.html" class="btn btn-ghost btn-sm" data-i18n="view_all">Dhammaan</a>
+    </div>
+    <div class="card" id="recentList">
+      <div class="empty-state">
+        <div class="empty-icon">&#128196;</div>
+        <h3>Wax diwaan ah lama helin</h3>
+        <p class="text-muted">Guus barta cagaaran hoose si aad u bilowdo diwaan cusub.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="active">
+      <span class="nav-icon">&#127968;</span>
+      <span data-i18n="dashboard">Dashboard</span>
+    </a>
+    <a href="form.html">
+      <span class="nav-icon">&#10133;</span>
+      <span data-i18n="new_reg">Diwaan Cusub</span>
+    </a>
+    <a href="digitizer.html">
+      <span class="nav-icon">&#128506;</span>
+      <span data-i18n="map">Khariidad</span>
+    </a>
+    <a href="submissions.html">
+      <span class="nav-icon">&#128196;</span>
+      <span data-i18n="profile">Diwaanada</span>
+    </a>
+  </nav>
+
+  <!-- FAB -->
+  <a href="form.html" class="fab">+</a>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!AUTH.requireAuth()) return;
+
+      const user = AUTH.getCurrentUser();
+      const cityCode = user.cityCode;
+
+      document.getElementById('navCity').textContent = user.cityName || cityCode;
+      document.getElementById('navCity').style.display = 'inline';
+      document.getElementById('navCityBadge').textContent = user.cityName || cityCode;
+      document.getElementById('navCityBadge').style.display = 'inline';
+      document.getElementById('navUser').textContent = user.name || user.username;
+      document.getElementById('navUser').style.display = 'inline';
+
+      const lang = AUTH.getLang();
+      document.getElementById('welcomeHeading').textContent = lang === 'en'
+        ? `Welcome, ${user.name || user.username}!`
+        : `Soo dhawoow, ${user.name || user.username}!`;
+      document.getElementById('welcomeSubtext').textContent = lang === 'en'
+        ? 'Here is your registration summary.'
+        : 'Halkan waxaad ka arki kartaa soo koobidda diwaanadaada.';
+
+      APP.showLoading();
+
+      try {
+        const result = await API.getDashboardStats(cityCode);
+
+        if (result.success) {
+          document.getElementById('statToday').textContent = result.data.today || 0;
+          document.getElementById('statMonth').textContent = result.data.month || 0;
+          document.getElementById('statArea').textContent = (result.data.totalArea || 0).toFixed(1);
+          document.getElementById('statPending').textContent = result.data.pending || 0;
+          document.getElementById('statMale').textContent = result.data.male || 0;
+          document.getElementById('statFemale').textContent = result.data.female || 0;
+
+          // Load recent submissions
+          if (result.data.recent && result.data.recent.length > 0) {
+            const listEl = document.getElementById('recentList');
+            listEl.innerHTML = '';
+            result.data.recent.forEach(sub => {
+              const row = document.createElement('div');
+              row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);';
+              row.innerHTML = `
+                <div>
+                  <div style="font-weight:600;font-size:0.9rem;">${sub.owner_name || 'Unknown'}</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);">${APP.formatDate(sub.survey_date)} &middot; ${sub.sub_district || ''}</div>
+                </div>
+                <span class="table-status ${sub.status === 'completed' ? 'completed' : 'draft'}">${sub.status || 'draft'}</span>
+              `;
+              listEl.appendChild(row);
+            });
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        // Show sample data for demo
+        document.getElementById('statToday').textContent = '—';
+        document.getElementById('statMonth').textContent = '—';
+        document.getElementById('statArea').textContent = '—';
+      }
+
+      APP.hideLoading();
+    });
+  </script>
+</body>
+</html>

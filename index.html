@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MUNICIPALITY — Nidaamka Diwaangelinta Dhulka</title>
+  <meta name="description" content="Municipality Field Registration System - Bosaso, Somalia">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a1628">
+  <link rel="apple-touch-icon" href="assets/img/icon-192.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="no-bottom-nav">
+  <div class="login-page">
+    <div class="lang-switcher">
+      <button class="lang-btn active" data-lang="so" onclick="switchLang('so')">Soomaali</button>
+      <button class="lang-btn" data-lang="en" onclick="switchLang('en')">English</button>
+    </div>
+
+    <div class="login-logo">
+      <div class="logo-icon">M</div>
+      <h1>MUNICIPALITY</h1>
+      <p id="loginSubtitle">Nidaamka Diwaangelinta Dhulka</p>
+    </div>
+
+    <div class="login-card">
+      <div class="card">
+        <form id="loginForm" autocomplete="off">
+          <div class="form-group">
+            <label for="username" id="lblUsername">Magaca isticmaale</label>
+            <input type="text" id="username" placeholder="Magaca isticmaale" required autocomplete="username">
+          </div>
+
+          <div class="form-group">
+            <label for="password" id="lblPassword">Furaha sirta ah</label>
+            <input type="password" id="password" placeholder="Furaha sirta ah" required autocomplete="current-password">
+          </div>
+
+          <div class="form-group">
+            <label for="cityCode" id="lblCityCode">Koodhka Magaalada</label>
+            <input type="text" id="cityCode" placeholder="e.g. BOS" required autocomplete="off" value="">
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="btnLogin">Gal</button>
+        </form>
+
+        <div style="text-align:center;margin-top:16px;">
+          <button class="btn btn-ghost btn-sm" onclick="showAdminModal()" id="btnAdminLogin">Admin Galid</button>
+        </div>
+      </div>
+
+      <p class="login-footer" id="loginFooter">
+        &copy; 2026 MUNICIPALITY &middot; Bosaso, Somalia
+      </p>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal" style="position:relative;">
+      <button class="modal-close" onclick="closeAdminModal()">&times;</button>
+      <h2 id="adminModalTitle">Admin Galid</h2>
+      <form id="adminLoginForm">
+        <div class="form-group">
+          <label for="adminPassword" id="lblAdminPassword">Furaha Admin-ka</label>
+          <input type="password" id="adminPassword" placeholder="Furaha sirta ah" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="btnAdminLoginSubmit">Gal</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    // Restore saved city code
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedCode = AUTH.getStoredCityCode();
+      if (savedCode) document.getElementById('cityCode').value = savedCode;
+    });
+
+    // Language switching
+    function switchLang(lang) {
+      AUTH.setLang(lang);
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+      document.documentElement.lang = lang;
+
+      const t = (key) => APP.t(key);
+
+      document.getElementById('loginSubtitle').textContent = lang === 'en'
+        ? 'Field Registration System'
+        : 'Nidaamka Diwaangelinta Dhulka';
+      document.getElementById('lblUsername').textContent = t('username');
+      document.getElementById('lblPassword').textContent = t('password');
+      document.getElementById('lblCityCode').textContent = t('city_code');
+      document.getElementById('btnLogin').textContent = t('sign_in');
+      document.getElementById('btnAdminLogin').textContent = t('admin_login');
+      document.getElementById('adminModalTitle').textContent = lang === 'en' ? 'Admin Login' : 'Admin Galid';
+      document.getElementById('lblAdminPassword').textContent = t('admin_password');
+      document.getElementById('btnAdminLoginSubmit').textContent = t('sign_in');
+      document.getElementById('loginFooter').innerHTML = '&copy; 2026 MUNICIPALITY &middot; Bosaso, Somalia';
+
+      document.getElementById('username').placeholder = t('username');
+      document.getElementById('password').placeholder = t('password');
+      document.getElementById('cityCode').placeholder = lang === 'en' ? 'e.g. BOS' : 'e.g. BOS';
+    }
+
+    // Admin modal
+    function showAdminModal() {
+      document.getElementById('adminModal').classList.add('open');
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminModal').classList.remove('open');
+    }
+
+    // Close modal on overlay click
+    document.getElementById('adminModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeAdminModal();
+    });
+
+    // Login form handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const cityCode = document.getElementById('cityCode').value.trim().toUpperCase();
+
+      if (!username || !password || !cityCode) {
+        APP.showToast(APP.t('required'), 'error');
+        return;
+      }
+
+      APP.showLoading(APP.t('loading'));
+
+      try {
+        const user = await AUTH.login(username, password, cityCode);
+        APP.hideLoading();
+        APP.showToast(APP.t('success'), 'success');
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        APP.hideLoading();
+        APP.showToast(err.message || APP.t('login_error'), 'error');
+      }
+    });
+
+    // Admin login form handler
+    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('adminPassword').value.trim();
+
+      if (!password) {
+        APP.showToast(APP.t('required'), 'error');
+        return;
+      }
+
+      APP.showLoading(APP.t('loading'));
+
+      try {
+        const user = await AUTH.adminLogin(password);
+        APP.hideLoading();
+        closeAdminModal();
+        APP.showToast(APP.t('success'), 'success');
+        window.location.href = 'admin.html';
+      } catch (err) {
+        APP.hideLoading();
+        APP.showToast(err.message || APP.t('login_error'), 'error');
+      }
+    });
+
+    // Initialize with saved language
+    const savedLang = AUTH.getLang();
+    switchLang(savedLang);
+  </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Diwaanada — MUNICIPALITY</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a1628">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="container">
+      <div class="nav-brand">
+        <div style="width:32px;height:32px;background:#00c896;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0a1628;font-size:0.9rem;">M</div>
+        MUNICIPALITY
+        <span id="navCity" style="display:none;"></span>
+      </div>
+      <div class="nav-right">
+        <button class="btn-logout" onclick="AUTH.logout()">Ka bax</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-top:calc(64px + 20px);padding-bottom:80px;">
+    <div class="flex items-center justify-between" style="margin-bottom:20px;">
+      <h1 data-i18n="recent_submissions">Diwaanada</h1>
+      <button class="btn btn-outline btn-sm" onclick="handleExport()" id="exportBtn">&#128229; CSV</button>
+    </div>
+
+    <!-- Search / Filters -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Raadi magaca milkiilaha..." oninput="filterSubmissions()">
+      <select id="filterDistrict" onchange="filterSubmissions()">
+        <option value="">Dhammaan degmooyinka</option>
+        <option value="Biyo Kulule">Biyo Kulule</option>
+        <option value="Buurcad">Buurcad</option>
+        <option value="Baalade">Baalade</option>
+        <option value="Benderqaasim">Benderqaasim</option>
+      </select>
+      <input type="date" id="filterDateStart" onchange="filterSubmissions()">
+      <input type="date" id="filterDateEnd" onchange="filterSubmissions()">
+    </div>
+
+    <!-- Submissions Table -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Milkiilaha</th>
+              <th>Degmada</th>
+              <th>Bed (m²)</th>
+              <th>Taariikhda</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="submissionsBody">
+            <tr>
+              <td colspan="7" class="text-center text-muted" style="padding:48px;">
+                <div style="font-size:2rem;margin-bottom:8px;">&#128196;</div>
+                Wax diwaan ah lama helin
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex items-center justify-between" style="margin-top:16px;">
+      <span class="text-muted" style="font-size:0.8rem;" id="paginationInfo">0 diwaan</span>
+      <div class="flex gap-8">
+        <button class="btn btn-outline btn-sm" onclick="prevPage()" id="prevBtn" disabled>&#8592;</button>
+        <button class="btn btn-outline btn-sm" onclick="nextPage()" id="nextBtn" disabled>&#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html"><span class="nav-icon">&#127968;</span><span>Dashboard</span></a>
+    <a href="form.html"><span class="nav-icon">&#10133;</span><span>Diwaan Cusub</span></a>
+    <a href="digitizer.html"><span class="nav-icon">&#128506;</span><span>Khariidad</span></a>
+    <a href="submissions.html" class="active"><span class="nav-icon">&#128196;</span><span>Diwaanada</span></a>
+  </nav>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    let allSubmissions = [];
+    let filteredSubmissions = [];
+    let currentPage = 1;
+    const PAGE_SIZE = 20;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!AUTH.requireAuth()) return;
+
+      const user = AUTH.getCurrentUser();
+      document.getElementById('navCity').textContent = user.cityName || user.cityCode;
+      document.getElementById('navCity').style.display = 'inline';
+
+      APP.showLoading('Soo saaraya diwaanada...');
+
+      try {
+        const result = await API.getSubmissions({ cityCode: user.cityCode });
+        if (result.success) {
+          allSubmissions = result.data || [];
+          filteredSubmissions = [...allSubmissions];
+          renderTable();
+        }
+      } catch (err) {
+        console.error(err);
+        // For demo, show empty state
+      }
+
+      APP.hideLoading();
+    });
+
+    function filterSubmissions() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const district = document.getElementById('filterDistrict').value;
+      const dateStart = document.getElementById('filterDateStart').value;
+      const dateEnd = document.getElementById('filterDateEnd').value;
+
+      filteredSubmissions = allSubmissions.filter(s => {
+        const matchSearch = !search || (s.owner_name || '').toLowerCase().includes(search);
+        const matchDistrict = !district || s.sub_district === district;
+        const matchDateStart = !dateStart || (s.survey_date || '') >= dateStart;
+        const matchDateEnd = !dateEnd || (s.survey_date || '') <= dateEnd;
+        return matchSearch && matchDistrict && matchDateStart && matchDateEnd;
+      });
+
+      currentPage = 1;
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('submissionsBody');
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      const pageData = filteredSubmissions.slice(start, end);
+
+      document.getElementById('paginationInfo').textContent =
+        `${filteredSubmissions.length} diwaan`;
+
+      document.getElementById('prevBtn').disabled = currentPage <= 1;
+      document.getElementById('nextBtn').disabled = end >= filteredSubmissions.length;
+
+      if (pageData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted" style="padding:48px;">
+          <div style="font-size:2rem;margin-bottom:8px;">&#128196;</div>
+          Wax diwaan ah lama helin
+        </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = pageData.map(s => `
+        <tr>
+          <td style="font-family:monospace;font-size:0.75rem;">${s.submission_id || '—'}</td>
+          <td><strong>${s.owner_name || 'Unknown'}</strong></td>
+          <td>${s.sub_district || '—'}</td>
+          <td>${parseFloat(s.land_area || s.gis_area || 0).toFixed(1)}</td>
+          <td>${APP.formatDate(s.survey_date)}</td>
+          <td><span class="table-status ${s.status === 'completed' ? 'completed' : 'draft'}">${s.status || 'draft'}</span></td>
+          <td>
+            <div class="table-actions">
+              <button class="btn btn-outline btn-sm" onclick="viewSubmission('${s.submission_id}')">&#128065;</button>
+              <button class="btn btn-outline btn-sm" onclick="printSubmission('${s.submission_id}')">&#128424;</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function nextPage() {
+      if ((currentPage * PAGE_SIZE) < filteredSubmissions.length) {
+        currentPage++;
+        renderTable();
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    }
+
+    function viewSubmission(id) {
+      // Store submission ID and open print page with detail view
+      sessionStorage.setItem('print_submission_id', id);
+      window.location.href = `print.html?id=${id}`;
+    }
+
+    function printSubmission(id) {
+      sessionStorage.setItem('print_submission_id', id);
+      window.location.href = `print.html?id=${id}&print=1`;
+    }
+
+    function handleExport() {
+      const headers = ['ID', 'Milkiilaha', 'Taleefanka', 'Degmada', 'Xaafada', 'Bed (m²)', 'Taariikhda', 'Status'];
+      const rows = filteredSubmissions.map(s => [
+        s.submission_id || '',
+        s.owner_name || '',
+        s.owner_phone || '',
+        s.sub_district || '',
+        s.section || '',
+        parseFloat(s.land_area || s.gis_area || 0).toFixed(1),
+        s.survey_date || '',
+        s.status || '',
+      ]);
+      APP.downloadCSV(headers, rows, `MUNICIPALITY_submissions_${APP.todayISO()}.csv`);
+      APP.showToast('CSV waa la soo dejiyay', 'success');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Diwaan Cusub — MUNICIPALITY</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a1628">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="container">
+      <div class="nav-brand">
+        <div style="width:32px;height:32px;background:#00c896;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0a1628;font-size:0.9rem;">M</div>
+        MUNICIPALITY
+        <span id="navCity" style="display:none;"></span>
+      </div>
+      <div class="nav-right">
+        <button class="btn-logout" onclick="AUTH.logout()">Ka bax</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-bottom:80px;">
+    <div class="progress-bar-container" id="progressBar"></div>
+    <div class="progress-label" id="progressLabel">Bog 1 ee 9</div>
+
+    <form id="registrationForm" novalidate>
+      <!-- Bog 1: Horudhaca -->
+      <div class="form-page active" data-page="1">
+        <div class="form-section-title">Bog 1 — Horudhaca</div>
+        <div class="form-group">
+          <label>Magaca injineerka</label>
+          <input type="text" id="engineerName" readonly>
+        </div>
+        <div class="form-group">
+          <label>Taariikhda sahanka</label>
+          <input type="date" id="surveyDate" required>
+        </div>
+        <div class="form-group">
+          <label>Waqtiga</label>
+          <input type="time" id="surveyTime">
+        </div>
+      </div>
+
+      <!-- Bog 2: Milkiilaha -->
+      <div class="form-page" data-page="2">
+        <div class="form-section-title">Bog 2 — Macluumaadka Milkiilaha</div>
+        <div class="form-group">
+          <label>Magaca milkiilaha</label>
+          <input type="text" id="ownerName" required>
+        </div>
+        <div class="form-group">
+          <label>Lambarka taleefanka</label>
+          <input type="tel" id="ownerPhone" placeholder="e.g. 615XXXXXX" required>
+        </div>
+        <div class="form-group">
+          <label>Magaca hooyada</label>
+          <input type="text" id="motherName" required>
+        </div>
+        <div class="form-group">
+          <label>Jinsiga</label>
+          <select id="ownerGender" required>
+            <option value="">Dooro...</option>
+            <option value="Male">Lab</option>
+            <option value="Female">Dhedig</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Bog 3: Tixraaca -->
+      <div class="form-page" data-page="3">
+        <div class="form-section-title">Bog 3 — Macluumaadka Tixraaca</div>
+        <div class="form-group">
+          <label>Magaca tixraaca</label>
+          <input type="text" id="refName" required>
+        </div>
+        <div class="form-group">
+          <label>Jinsiga tixraaca</label>
+          <select id="refGender" required>
+            <option value="">Dooro...</option>
+            <option value="Male">Lab</option>
+            <option value="Female">Dhedig</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Lambarka taleefanka tixraaca</label>
+          <input type="tel" id="refPhone" placeholder="e.g. 615XXXXXX" required>
+        </div>
+        <div class="form-group">
+          <label>Xiriirka</label>
+          <select id="refRelation" required>
+            <option value="">Dooro...</option>
+            <option value="Walaal">Walaal</option>
+            <option value="Deris">Deris</option>
+            <option value="Saaxiib">Saaxiib</option>
+            <option value="Qaraabo">Qaraabo</option>
+            <option value="Other">Mid kale</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Bog 4: Dhulka -->
+      <div class="form-page" data-page="4">
+        <div class="form-section-title">Bog 4 — Macluumaadka Dhulka</div>
+        <div class="form-group">
+          <label>Nooca dhulka</label>
+          <select id="landType" required>
+            <option value="">Dooro...</option>
+            <option value="Guri Dhisan">Guri Dhisan</option>
+            <option value="Dhul">Dhul</option>
+            <option value="Beer">Beer</option>
+            <option value="Dumin">Dumin</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ballaca (m)</label>
+            <input type="number" id="landWidth" step="0.01" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Dhererka (m)</label>
+            <input type="number" id="landLength" step="0.01" min="0" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Bedka (m²) — auto calculated</label>
+          <input type="number" id="landArea" step="0.01" readonly style="background:var(--accent-green-dim);color:var(--accent-green);font-weight:700;">
+        </div>
+      </div>
+
+      <!-- Bog 5: Kaydastarka -->
+      <div class="form-page" data-page="5">
+        <div class="form-section-title">Bog 5 — Macluumaadka Kaydastarka</div>
+        <div class="form-group">
+          <label>Degmada (Sub-District)</label>
+          <select id="subDistrict" required>
+            <option value="">Dooro...</option>
+            <option value="Biyo Kulule">Biyo Kulule</option>
+            <option value="Buurcad">Buurcad</option>
+            <option value="Baalade">Baalade</option>
+            <option value="Benderqaasim">Benderqaasim</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Xaafada (Section)</label>
+          <select id="section" required>
+            <option value="">Marka hore dooro degmada</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Magaca waddada (Street)</label>
+          <input type="text" id="streetName" required>
+        </div>
+        <div class="form-group">
+          <label>Calanka (Landmark nearby)</label>
+          <input type="text" id="landmark">
+        </div>
+      </div>
+
+      <!-- Bog 6: Xuduudaha -->
+      <div class="form-page" data-page="6">
+        <div class="form-section-title">Bog 6 — Xuduudaha Dariska</div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label>Waqooyi — Magaca dariska</label>
+            <input type="text" id="boundNorthName" required>
+          </div>
+          <div class="form-group">
+            <label>Waqooyi — Fogaanta (m)</label>
+            <input type="number" id="boundNorthDist" step="0.01" min="0" required>
+          </div>
+        </div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label>Koonfur — Magaca dariska</label>
+            <input type="text" id="boundSouthName" required>
+          </div>
+          <div class="form-group">
+            <label>Koonfur — Fogaanta (m)</label>
+            <input type="number" id="boundSouthDist" step="0.01" min="0" required>
+          </div>
+        </div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label>Bari — Magaca dariska</label>
+            <input type="text" id="boundEastName" required>
+          </div>
+          <div class="form-group">
+            <label>Bari — Fogaanta (m)</label>
+            <input type="number" id="boundEastDist" step="0.01" min="0" required>
+          </div>
+        </div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label>Galbeed — Magaca dariska</label>
+            <input type="text" id="boundWestName" required>
+          </div>
+          <div class="form-group">
+            <label>Galbeed — Fogaanta (m)</label>
+            <input type="number" id="boundWestDist" step="0.01" min="0" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bog 7: Nootaayada -->
+      <div class="form-page" data-page="7">
+        <div class="form-section-title">Bog 7 — Xogta Nootaayada</div>
+        <div class="form-group">
+          <label>TIX/LR Number</label>
+          <input type="text" id="tixNumber" required>
+        </div>
+        <div class="form-group">
+          <label>Taariikhda soo saarista</label>
+          <input type="date" id="tixDate" required>
+        </div>
+        <div class="form-group">
+          <label>Hay'adda soo saartay</label>
+          <input type="text" id="tixAuthority" required>
+        </div>
+      </div>
+
+      <!-- Bog 8: GIS -->
+      <div class="form-page" data-page="8">
+        <div class="form-section-title">Bog 8 — GIS / Khariidad</div>
+        <p class="text-muted" style="margin-bottom:16px;">
+          Ku dhufo badhanka hoose si aad u furo khariidadda oo aad ugu sawirto dhulka.
+        </p>
+        <button type="button" class="btn btn-primary btn-block" onclick="openDigitizer()">
+          &#128506; Ku sawir khariidadda
+        </button>
+
+        <div id="kmlInfo" style="display:none;margin-top:16px;padding:16px;background:var(--accent-green-dim);border-radius:8px;">
+          <div class="flex items-center gap-8" style="margin-bottom:8px;">
+            <span style="color:var(--accent-green);font-weight:600;">&#10003; KML waa la soo dejiyay</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Bedka (m²)</span>
+            <span class="detail-value" id="kmlArea">0</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Wareega (m)</span>
+            <span class="detail-value" id="kmlPerimeter">0</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Dhibcaha</span>
+            <span class="detail-value" id="kmlPoints">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bog 9: Sawirada -->
+      <div class="form-page" data-page="9">
+        <div class="form-section-title">Bog 9 — Sawirada</div>
+        <div class="form-group">
+          <label>Sawirka milkiilaha</label>
+          <input type="file" id="ownerPhoto" accept="image/*" capture="environment">
+        </div>
+        <div class="form-group">
+          <label>Sawirka hantida / dhulka</label>
+          <input type="file" id="propertyPhoto" accept="image/*" capture="environment">
+        </div>
+        <div id="photoPreview" class="flex gap-12" style="flex-wrap:wrap;margin-top:12px;"></div>
+      </div>
+    </form>
+
+    <!-- Form Navigation -->
+    <div class="form-nav">
+      <button type="button" class="btn btn-outline" id="btnBack" onclick="prevPage()" style="display:none;">Dib</button>
+      <div style="flex:1;"></div>
+      <button type="button" class="btn btn-ghost" id="btnSaveDraft" onclick="saveDraft()">Qabyo Kaydi</button>
+      <button type="button" class="btn btn-primary" id="btnNext" onclick="nextPage()">Xiga</button>
+      <button type="button" class="btn btn-primary" id="btnSubmit" onclick="submitForm()" style="display:none;">Gudbi</button>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html"><span class="nav-icon">&#127968;</span><span>Dashboard</span></a>
+    <a href="form.html" class="active"><span class="nav-icon">&#10133;</span><span>Diwaan Cusub</span></a>
+    <a href="digitizer.html"><span class="nav-icon">&#128506;</span><span>Khariidad</span></a>
+    <a href="submissions.html"><span class="nav-icon">&#128196;</span><span>Diwaanada</span></a>
+  </nav>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    const TOTAL_PAGES = 9;
+    let currentPage = 1;
+    let draftKey = 'mun_form_draft';
+
+    // Sub-district to Section mapping
+    const sectionMap = {
+      'Biyo Kulule': ['Suweyto', '26ka Juun', "Gu'soore", 'Girible B', 'Girible A', 'Dayaxa', 'Sanfarow'],
+      'Buurcad': ['Sanfarow', 'Girible Ubax'],
+      'Baalade': ['Kulmiye', 'Hormuud', 'Horseed', 'Octoobar'],
+      'Benderqaasim': ['Hormuud', 'Kulmiye', 'Wadajir', 'Howlwadaag', '1 Luulyo', 'Xaafatul Carab'],
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!AUTH.requireAuth()) return;
+
+      const user = AUTH.getCurrentUser();
+      document.getElementById('engineerName').value = user.name || user.username;
+      document.getElementById('surveyDate').value = APP.todayISO();
+      document.getElementById('navCity').textContent = user.cityName || user.cityCode;
+      document.getElementById('navCity').style.display = 'inline';
+
+      loadDraft();
+      updateProgress();
+      updateNavButtons();
+
+      // Auto-calculate area
+      document.getElementById('landWidth').addEventListener('input', calcArea);
+      document.getElementById('landLength').addEventListener('input', calcArea);
+
+      // Cascading dropdown
+      document.getElementById('subDistrict').addEventListener('change', updateSections);
+
+      // Photo preview
+      document.getElementById('ownerPhoto').addEventListener('change', (e) => previewPhoto(e, 'ownerPreview'));
+      document.getElementById('propertyPhoto').addEventListener('change', (e) => previewPhoto(e, 'propertyPreview'));
+
+      // Check for KML from digitizer
+      const kmlData = sessionStorage.getItem('kml_digitized');
+      if (kmlData) {
+        try {
+          const data = JSON.parse(kmlData);
+          showKmlInfo(data);
+        } catch (e) {}
+      }
+    });
+
+    function calcArea() {
+      const w = parseFloat(document.getElementById('landWidth').value) || 0;
+      const l = parseFloat(document.getElementById('landLength').value) || 0;
+      document.getElementById('landArea').value = (w * l).toFixed(2);
+    }
+
+    function updateSections() {
+      const sub = document.getElementById('subDistrict').value;
+      const secEl = document.getElementById('section');
+      secEl.innerHTML = '<option value="">Dooro xaafada</option>';
+      if (sectionMap[sub]) {
+        sectionMap[sub].forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s;
+          opt.textContent = s;
+          secEl.appendChild(opt);
+        });
+      }
+    }
+
+    function updateProgress() {
+      const bar = document.getElementById('progressBar');
+      bar.innerHTML = '';
+      for (let i = 1; i <= TOTAL_PAGES; i++) {
+        const step = document.createElement('div');
+        step.className = 'progress-step';
+        if (i === currentPage) step.classList.add('active');
+        else if (i < currentPage) step.classList.add('completed');
+        bar.appendChild(step);
+      }
+      document.getElementById('progressLabel').textContent = `Bog ${currentPage} ee ${TOTAL_PAGES}`;
+    }
+
+    function updateNavButtons() {
+      document.getElementById('btnBack').style.display = currentPage > 1 ? 'inline-flex' : 'none';
+      document.getElementById('btnNext').style.display = currentPage < TOTAL_PAGES ? 'inline-flex' : 'none';
+      document.getElementById('btnSubmit').style.display = currentPage === TOTAL_PAGES ? 'inline-flex' : 'none';
+    }
+
+    function validateCurrentPage() {
+      const page = document.querySelector(`.form-page[data-page="${currentPage}"]`);
+      const inputs = page.querySelectorAll('input[required], select[required]');
+      let valid = true;
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          input.classList.add('error');
+          valid = false;
+        } else {
+          input.classList.remove('error');
+        }
+      });
+      return valid;
+    }
+
+    function nextPage() {
+      if (!validateCurrentPage()) {
+        APP.showToast('Fadlan buuxi dhammaan goobaha loo baahan yahay', 'error');
+        return;
+      }
+      if (currentPage < TOTAL_PAGES) {
+        document.querySelector(`.form-page[data-page="${currentPage}"]`).classList.remove('active');
+        currentPage++;
+        document.querySelector(`.form-page[data-page="${currentPage}"]`).classList.add('active');
+        updateProgress();
+        updateNavButtons();
+        window.scrollTo(0, 0);
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        document.querySelector(`.form-page[data-page="${currentPage}"]`).classList.remove('active');
+        currentPage--;
+        document.querySelector(`.form-page[data-page="${currentPage}"]`).classList.add('active');
+        updateProgress();
+        updateNavButtons();
+        window.scrollTo(0, 0);
+      }
+    }
+
+    function collectFormData() {
+      const kmlData = sessionStorage.getItem('kml_digitized');
+      let kml = null;
+      if (kmlData) {
+        try { kml = JSON.parse(kmlData); } catch (e) {}
+      }
+
+      return {
+        engineer_name: document.getElementById('engineerName').value,
+        survey_date: document.getElementById('surveyDate').value,
+        survey_time: document.getElementById('surveyTime').value,
+        owner_name: document.getElementById('ownerName').value,
+        owner_phone: document.getElementById('ownerPhone').value,
+        mother_name: document.getElementById('motherName').value,
+        owner_gender: document.getElementById('ownerGender').value,
+        ref_name: document.getElementById('refName').value,
+        ref_gender: document.getElementById('refGender').value,
+        ref_phone: document.getElementById('refPhone').value,
+        ref_relation: document.getElementById('refRelation').value,
+        land_type: document.getElementById('landType').value,
+        land_width: document.getElementById('landWidth').value,
+        land_length: document.getElementById('landLength').value,
+        land_area: document.getElementById('landArea').value,
+        sub_district: document.getElementById('subDistrict').value,
+        section: document.getElementById('section').value,
+        street_name: document.getElementById('streetName').value,
+        landmark: document.getElementById('landmark').value,
+        bound_north_name: document.getElementById('boundNorthName').value,
+        bound_north_dist: document.getElementById('boundNorthDist').value,
+        bound_south_name: document.getElementById('boundSouthName').value,
+        bound_south_dist: document.getElementById('boundSouthDist').value,
+        bound_east_name: document.getElementById('boundEastName').value,
+        bound_east_dist: document.getElementById('boundEastDist').value,
+        bound_west_name: document.getElementById('boundWestName').value,
+        bound_west_dist: document.getElementById('boundWestDist').value,
+        tix_number: document.getElementById('tixNumber').value,
+        tix_date: document.getElementById('tixDate').value,
+        tix_authority: document.getElementById('tixAuthority').value,
+        gis_area: kml ? kml.area : document.getElementById('landArea').value,
+        gis_perimeter: kml ? kml.perimeter : 0,
+        gis_points: kml ? kml.pointCount : 0,
+        gis_center_lat: kml ? kml.centerLat : 0,
+        gis_center_lng: kml ? kml.centerLng : 0,
+        gis_kml_file: kml ? kml.filename : '',
+        gis_coords: kml ? JSON.stringify(kml.coords || []) : '',
+      };
+    }
+
+    function saveDraft() {
+      const data = collectFormData();
+      data._page = currentPage;
+      APP.saveDraft(draftKey, data);
+      APP.showToast('Qabyo waa la kaydiyay', 'success');
+    }
+
+    function loadDraft() {
+      const data = APP.loadDraft(draftKey);
+      if (!data) return;
+
+      const fields = [
+        'engineerName', 'surveyDate', 'surveyTime',
+        'ownerName', 'ownerPhone', 'motherName', 'ownerGender',
+        'refName', 'refGender', 'refPhone', 'refRelation',
+        'landType', 'landWidth', 'landLength', 'landArea',
+        'subDistrict', 'streetName', 'landmark',
+        'boundNorthName', 'boundNorthDist',
+        'boundSouthName', 'boundSouthDist',
+        'boundEastName', 'boundEastDist',
+        'boundWestName', 'boundWestDist',
+        'tixNumber', 'tixDate', 'tixAuthority',
+      ];
+
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && data[id] !== undefined) {
+          el.value = data[id];
+        }
+      });
+
+      // Restore sections dropdown if sub-district was set
+      if (data.subDistrict) {
+        updateSections();
+        if (data.section) {
+          document.getElementById('section').value = data.section;
+        }
+      }
+
+      // Restore page
+      if (data._page && data._page > 1) {
+        document.querySelector(`.form-page[data-page="1"]`).classList.remove('active');
+        currentPage = data._page;
+        document.querySelector(`.form-page[data-page="${currentPage}"]`).classList.add('active');
+        updateProgress();
+        updateNavButtons();
+      }
+    }
+
+    function openDigitizer() {
+      const data = collectFormData();
+      const params = new URLSearchParams({
+        ownerName: data.owner_name,
+        phone: data.owner_phone,
+        subDistrict: data.sub_district,
+        section: data.section,
+        area: data.land_area,
+        engineer: data.engineer_name,
+        surveyDate: data.survey_date,
+        cityCode: AUTH.getCurrentUser()?.cityCode || '',
+      });
+      window.location.href = `digitizer.html?${params.toString()}`;
+    }
+
+    function showKmlInfo(data) {
+      document.getElementById('kmlInfo').style.display = 'block';
+      document.getElementById('kmlArea').textContent = (data.area || 0).toFixed(1);
+      document.getElementById('kmlPerimeter').textContent = (data.perimeter || 0).toFixed(1);
+      document.getElementById('kmlPoints').textContent = data.pointCount || 0;
+    }
+
+    function previewPhoto(event, id) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const container = document.getElementById('photoPreview');
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.cssText = 'width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid var(--border-light);';
+        container.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function submitForm() {
+      if (!validateCurrentPage()) {
+        APP.showToast('Fadlan buuxi dhammaan goobaha loo baahan yahay', 'error');
+        return;
+      }
+
+      if (!confirm('Ma hubtaa inaad gudbiso diwaanadan?')) return;
+
+      const data = collectFormData();
+      data.submission_id = APP.generateId();
+      data.city_code = AUTH.getCurrentUser()?.cityCode || '';
+      data.status = 'completed';
+
+      APP.showLoading('Gudbinaya...');
+
+      try {
+        const result = await API.submitRegistration(data);
+        APP.hideLoading();
+
+        if (result.success) {
+          APP.removeDraft(draftKey);
+          sessionStorage.removeItem('kml_digitized');
+          APP.showToast(`Diwaangelinta waa la gudbiyay. ID: ${data.submission_id}`, 'success');
+          setTimeout(() => {
+            window.location.href = 'submissions.html';
+          }, 1500);
+        } else {
+          APP.showToast(result.message || 'Gudbinta waa qalad', 'error');
+        }
+      } catch (err) {
+        APP.hideLoading();
+        APP.showToast('Khalad xiriirka internetka', 'error');
+      }
+    }
+  </script>
+</body>
+</html>
